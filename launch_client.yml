@@ -33,10 +33,10 @@
 
   - name: Start running httperf instance 1 
     command: chdir=/benchmarking/httperf ./httperf --hog --server "{{server_ip}}" --port "{{server_port}}" --wsesslog="{{max_num_sessions}}",0,../filegen/"{{log_file_name1}}"  --rate="{{rate}}" --epoll --recv-buffer=8388608 --output-log="{{output_log1}}"
-    #async: 3600 # Run asynchronously, max time 3600 second
-    #poll: 0 
+    async: 3600 # Run asynchronously, max time 3600 second
+    poll: 0 
   - name: Start running httperf instance 2
     command: chdir=/benchmarking/httperf ./httperf --hog --server "{{server_ip}}" --port "{{server_port}}" --wsesslog="{{max_num_sessions}}",0,../filegen/"{{log_file_name2}}"  --rate="{{rate}}" --epoll --recv-buffer=8388608 --output-log="{{output_log2}}"
-    #async: 3600 
-    #poll: 0
+    async: 3600 
+    poll: 0
 
