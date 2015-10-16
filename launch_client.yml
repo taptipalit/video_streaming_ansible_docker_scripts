@@ -1,0 +1,40 @@
+---
+- hosts: videoclients
+  vars:
+    log_file_name1: cl-240p-50-10000-10-20-00.log
+    log_file_name2: cl-360p-50-4000-10-20-00.log
+    log_file_name3: cl-480p-50-1600-10-20-00.log
+    log_file_name4: cl-720p-50-800-10-20-00.log
+    server_shared_dir: /var/services/homes/tpalit/projects/benchmarking/docker_containers/video_streaming/tmp
+    max_num_sessions: 40
+    server_ip: 10.22.17.31
+    server_port: 6000
+    rate: 4
+#    local_ip: 10.22.17.31
+
+  tasks:
+  - name: Checkout the httperf repository 
+    git: repo=https://github.com/taptipalit/video_streaming_httperf.git dest=/benchmarking/httperf
+  - name: Configure httperf 
+    command: chdir=/benchmarking/httperf ./configure
+  - name: Make httperf
+    command: chdir=/benchmarking/httperf make
+  - name: Create the filegen directory
+    file: path=/benchmarking/filegen state=directory
+
+  - name: Copy over the httperf logs
+    copy: src="{{server_shared_dir}}/filegen/{{log_file_name1}}" dest=/benchmarking/filegen/
+  - name: Copy over the httperf logs
+    copy: src="{{server_shared_dir}}/filegen/{{log_file_name2}}" dest=/benchmarking/filegen/
+  - name: Copy over the httperf logs
+    copy: src="{{server_shared_dir}}/filegen/{{log_file_name3}}" dest=/benchmarking/filegen/
+
+  - name: Start running httperf instance 1 
+    command: chdir=/benchmarking/httperf ./httperf --hog --server "{{server_ip}}" --port "{{server_port}}" --wsesslog="{{max_num_sessions}}",0,../filegen/"{{log_file_name1}}"  --rate="{{rate}}" --epoll --recv-buffer=8388608 
+    async: 3600 # Run asynchronously, max time 3600 second
+    poll: 0 
+  - name: Start running httperf instance 2
+    command: chdir=/benchmarking/httperf ./httperf --hog --server "{{server_ip}}" --port "{{server_port}}" --wsesslog="{{max_num_sessions}}",0,../filegen/"{{log_file_name2}}"  --rate="{{rate}}" --epoll --recv-buffer=8388608 
+    async: 3600 
+    poll: 0
+
