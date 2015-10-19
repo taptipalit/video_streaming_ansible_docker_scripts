@@ -28,3 +28,6 @@ EXPOSE 22
 EXPOSE 80
 CMD ["/usr/sbin/sshd", "-D"]
 
+# Increase the open file limit
+COPY files/limits.conf.append /tmp/
+RUN cat /tmp/limits.conf.append >> /etc/security/limits.conf && rm -f /tmp/limits.conf.append
