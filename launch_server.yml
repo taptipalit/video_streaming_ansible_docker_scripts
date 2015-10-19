@@ -1,10 +1,12 @@
 ---
 - hosts: videoserver
   vars:
+    nginx_num_processes: 32
     config_file_240p: filegen_param_240p.conf
     config_file_360p: filegen_param_360p.conf
     config_file_480p: filegen_param_480p.conf
     config_file_720p: filegen_param_720p.conf
+    do_file_gen: false 
   tasks:
   - name: Checkout the file-generation directory 
     git: repo=https://github.com/taptipalit/fileset_log_generator.git dest=/benchmarking/filegen
@@ -12,39 +14,55 @@
     command: chdir=/benchmarking/filegen make make_zipf
   - name: Create the videos directory
     file: path=/benchmarking/videos state=directory
+    when: do_file_gen
   - name: Build gen_fileset tool
     command: chdir=/benchmarking/filegen make gen_fileset
+    when: do_file_gen
     # For 240p
   - name: Copy over 240p param config file
     copy: src=./{{config_file_240p}} dest=/benchmarking/filegen/filegen_param.conf
+    when: do_file_gen
   - name: Generate the logs and video-list for 240p
     command: chdir=/benchmarking/filegen ./make_zipf
+    when: do_file_gen
   - name: Generate video file-set for 240p
     command: chdir=/benchmarking/filegen /benchmarking/filegen/gen_fileset /benchmarking/videos/full-240p- /benchmarking/filegen/video_files.txt
+    when: do_file_gen
     # For 360p
   - name: Copy over 360p param config file
     copy: src=./{{config_file_360p}} dest=/benchmarking/filegen/filegen_param.conf
+    when: do_file_gen
   - name: Generate the logs and video-list for 360p
     command: chdir=/benchmarking/filegen ./make_zipf
+    when: do_file_gen
   - name: Generate video file-set for 360p
     command: chdir=/benchmarking/filegen /benchmarking/filegen/gen_fileset /benchmarking/videos/full-360p- /benchmarking/filegen/video_files.txt
+    when: do_file_gen
     # For 480p
   - name: Copy over 480p param config file
     copy: src=./{{config_file_480p}} dest=/benchmarking/filegen/filegen_param.conf
+    when: do_file_gen
   - name: Generate the logs and video-list for 480p
     command: chdir=/benchmarking/filegen ./make_zipf
+    when: do_file_gen
   - name: Generate video file-set for 480p
     command: chdir=/benchmarking/filegen /benchmarking/filegen/gen_fileset /benchmarking/videos/full-480p- /benchmarking/filegen/video_files.txt
+    when: do_file_gen
     # For 720p
   - name: Copy over 720p param config file
     copy: src=./{{config_file_720p}} dest=/benchmarking/filegen/filegen_param.conf
+    when: do_file_gen
   - name: Generate the logs and video-list for 720p
     command: chdir=/benchmarking/filegen ./make_zipf
+    when: do_file_gen
   - name: Generate video file-set for 720p
     command: chdir=/benchmarking/filegen /benchmarking/filegen/gen_fileset /benchmarking/videos/full-720p- /benchmarking/filegen/video_files.txt
+    when: do_file_gen
   - name: Update the /usr/share/nginx/html to point to the videos directory
     command: sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sites-available/default 
     sudo: yes
+  - name: Update the number of processes to start
+    lineinfile: dest=/etc/nginx/nginx.conf regexp='worker_processes' line="worker_processes {{nginx_num_processes}}"
   - name: ensure nginx is installed
     apt: pkg=nginx state=present update_cache=yes
   - name: ensure nginx is running
