@@ -1,0 +1,26 @@
+Docker containers and Ansible scripts for video-streaming benchmark
+
+This document describes the setup for the video-streaming benchmark. The setup consists of two parts -- the server and client Docker containers, and the Ansible scripts, which orchestrate the execution of the benchmark on the server and client docker containers. Docker must be installed on the machines which will host the server and client containers. Ansible needs to be installed only on the machine that will act as the "orchestrator" for the benchmarking tests.
+
+======== Docker containers ========  
+The specification of the docker containers for the server and the client are in the directories server_docker/ and httperf_client_docker/ respectively. 
+
+server_docker:
+
+1. Dockerfile that specifies the Docker build
+2. files/limits.conf.append - This file will replace the /etc/security/limits.conf inside the Docker container. This is needed to increase the max_open_file_descriptor limit on the system.
+
+httper_client_docker:
+1. Dockerfile that specifies the Docker build
+
+In addition, the following files and directories are important --
+
+1. tmp and tmp2 directories - These directories will be mounted in the docker containers: tmp for the server docker container and tmp2 for the client container. The source code will be checked out and built in these directories, and in case of the server contiainer, the video files will be generated in here. These directories will persist even if the docker container is removed.
+2. filegen_param_<X>p.conf - These files will be read by the Ansible playbooks to generate the video file-set for different resolutions.
+3. ansible-inventory.ini - This is the inventory file for Ansible. Its contents should replace /etc/ansible/hosts on the machine which is running Ansible. It should be modified to reflect the IP and port of the server and client docker containers.
+
+======== Ansible playbooks ========  
+
+There are two Ansible playbooks -- launch_server.yml and launch_client.yml, to launch the server and the client respectively. There's a section named 'vars' at the beginning of both files, which consists of parameters that the benchmark user must fill. They are set to defaults.
+
+Running the Ansible playbook for the server will generate 1) the videos 2) the log files which contain descriptions of sessions. These log files need to be , manually, copied over to the tmp2 directory of the client docker and the httperf client will replay these logs to benchmark the server.

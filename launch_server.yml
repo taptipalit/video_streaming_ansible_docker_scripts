@@ -1,12 +1,13 @@
 ---
 - hosts: videoserver
   vars:
-    nginx_num_processes: 32
-    config_file_240p: filegen_param_240p.conf
-    config_file_360p: filegen_param_360p.conf
+    # Modify these parameters for required settings
+    nginx_num_processes: 32 				# Number of NGINX processes to launch
+    config_file_240p: filegen_param_240p.conf		# Names of the config files that specify the details of the file-sets
+    config_file_360p: filegen_param_360p.conf		
     config_file_480p: filegen_param_480p.conf
     config_file_720p: filegen_param_720p.conf
-    do_file_gen: false 
+    do_file_gen: false 					# Whether to do the file-generation or just start the NGINX server
   tasks:
   - name: Checkout the file-generation directory 
     git: repo=https://github.com/taptipalit/fileset_log_generator.git dest=/benchmarking/filegen

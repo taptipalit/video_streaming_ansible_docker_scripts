@@ -1,17 +1,18 @@
 ---
 - hosts: videoclients
   vars:
-    log_file_name1: cl-240p-50-10000-10-20-00.log
+    log_file_name1: cl-240p-50-10000-10-20-00.log			# The names of the log files generated on the server and copied over to the client
     log_file_name2: cl-360p-50-4000-10-20-00.log
     log_file_name3: cl-480p-50-1600-10-20-00.log
     log_file_name4: cl-720p-50-800-10-20-00.log
-    output_log1: output_log1.log
+    output_log1: output_log1.log					# Name of the output file that will store the results of the benchmark
     output_log2: output_log2.log
+    # Name of the shared directory on the host
     server_shared_dir: /var/services/homes/tpalit/projects/benchmarking/docker_containers/video_streaming/tmp
-    max_num_sessions: 40
-    server_ip: 10.22.17.31
+    max_num_sessions: 40						# Total number of sessions the client must launch
+    server_ip: 10.22.17.31						# The server ip and port
     server_port: 6000
-    rate: 4
+    rate: 4								# The rate at which new sessions must be launched
 #    local_ip: 10.22.17.31
 
   tasks:
