@@ -29,8 +29,8 @@ RUN echo ${ssh_key}  > /root/.ssh/authorized_keys
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
-EXPOSE 22
-EXPOSE 80
+#EXPOSE 22
+#EXPOSE 80
 
 # Increase the open file limit
 COPY files/limits.conf.append /tmp/
