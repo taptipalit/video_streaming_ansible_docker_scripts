@@ -93,7 +93,7 @@ httperf --hog --server 10.22.17.71 --port 80  --videosesslog=[/logs/cl-240p-50-1
 3. Clone the git repository for the remote execution scripts
 	git clone https://github.com/taptipalit/hunter.git
 
-4. Enter the IPs of the client machines in host_list.sh, and the list of Httperf commands in command_list.sh. Enter the full paths of the log files and their probability distribution for the --videosesslog parameter.
+4. Enter the IPs of the client machines in host_list.txt, and the list of Httperf commands in command_list.txt. Enter the full paths of the log files and their probability distribution for the --videosesslog parameter.
 
 5. Run the script to find the maximum throughput using a binary-search algorithm.
 
