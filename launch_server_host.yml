@@ -1,0 +1,32 @@
+---
+- hosts: all
+  tasks:
+  - name: Create the repo list
+    file: path=/etc/apt/sources.list.d/docker.list state=touch
+    sudo: yes
+  - name: Append the required repository
+    lineinfile: dest=/etc/apt/sources.list.d/docker.list line='deb https://apt.dockerproject.org/repo ubuntu-precise main' 
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '12.04' 
+  - name: Append the required repository
+    lineinfile: dest=/etc/apt/sources.list.d/docker.list line='deb https://apt.dockerproject.org/repo ubuntu-trusty main' 
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04' 
+  - name: Append the required repository
+    lineinfile: dest=/etc/apt/sources.list.d/docker.list line='deb https://apt.dockerproject.org/repo ubuntu-vivid main'
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '15.04'
+  - name: Ensure Docker is installed
+    apt: pkg=docker-engine state=present update_cache=yes
+    sudo: yes
+  - name: Checkout the Docker scripts
+    git: repo=https://github.com/taptipalit/video_streaming_ansible_docker_scripts.git dest=~/dockers   
+
+- hosts: serverhosts
+  tasks:
+  - name: Build the server docker
+    command: chdir=~/dockers/server_docker docker build -t streaming_server .
+  - name: Make a shared directory
+    file: path=~/shared_directory state=directory
+  - name: Run the server docker
+    command: chdir=~/dockers/server_docker docker run -t -d --net=host -v ~/shared_dir:/benchmarking --privileged=true --name=server_docker streaming_server
+
+
+ 
