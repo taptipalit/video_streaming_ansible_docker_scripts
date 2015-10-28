@@ -63,7 +63,7 @@
     command: sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sites-available/default 
     sudo: yes
   - name: Update the number of processes to start
-    lineinfile: dest=/etc/nginx/nginx.conf regexp='worker_processes' line="worker_processes {{nginx_num_processes}}"
+    lineinfile: dest=/etc/nginx/nginx.conf regexp='worker_processes' line="worker_processes {{nginx_num_processes}};"
   - name: ensure nginx is installed
     apt: pkg=nginx state=present update_cache=yes
   - name: ensure nginx is running

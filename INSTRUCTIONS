@@ -1,0 +1,93 @@
+This guide will describe the process of setting up the docker containers on the video server and the client machines. 
+
+a] Install Docker and build the docker containers on the server and client machines
+
+1. Open the /etc/apt/sources.list.d/docker.list file. If the file doesn.t exist, create it.
+   Add deb https://apt.dockerproject.org/repo ubuntu-trusty main
+
+2. apt-get update
+   sudo apt-get install docker-engine
+
+3. Checkout the repository containing the Dockerfiles and Ansible scripts on all machines
+   git clone https://github.com/taptipalit/video_streaming_ansible_docker_scripts.git
+
+4. Open the Dockerfiles and update the line containing ENV ssh_key. Replace your ssh key here.
+
+5. The Dockerfiles launch SSH on port 5000 for the server and 10000 on the client.
+
+6. Build the docker containers. Cd into the directory containing the Dockerfile and run the following commands. 
+   On the server,
+	docker build -t streaming_server .
+   On the clients,
+	docker build -t streaming_client .
+
+7. To share data between the container and the host machine, create directories <shared_dir> on both the server and client hosts. Make sure that the shared directory on the server has enough space for the video file-set to be stored.
+
+8. Ensure that the ports selected for SSH (in step 5) and port 80 is not in use on the host machines, else the deployment of the containers will fail.
+
+9. Launch the containers. Don't containerize the network, so set the --net=host flag. Mount the shared directory with the -v flag.
+   On the server,
+	docker run -t -d --net=host -v <shared_dir>:/benchmarking --privileged=true --name=server_docker streaming_server
+   On the client,
+	docker run -t -d --net=host -v <shared_dir>:/benchmarking --privileged=true --name=client_docker streaming_server
+
+10. Test that you can ssh into the containers by doing a ssh localhost -p <SSH_Port_Num_Chosen_In_Step5>. You should not be prompted for a password.
+
+b) Setup the Ansible machine
+
+1. Install Ansible.
+	apt-get update
+	apt-get install software-properties-common -y
+	add-apt-repository ppa:ansible/ansible -y
+	apt-get update
+	apt-get install ansible -y
+
+2. Checkout the repository
+	git clone https://github.com/taptipalit/video_streaming_ansible_docker_scripts.git
+
+3. Update the ansible-inventory.ini with the details needed to log into the server and client dockers.
+   Add all client machines under the [videoclients] section. The first value is an alias for the remote machine. ansible_ssh_user is the remote user that will be used to ssh into the machine. ansible_ssh_host is the IP of the remote machine. ansible_ssh_port is the port that ssh is running (as specified in Step a-5)
+
+4. Copy the ansible-inventory.ini to /etc/ansible/hosts
+
+
+c) Setting up the video server container using Ansible playbook
+
+1. The launch_client.yml playbook is the Ansible playbook for the client. It is parameterized. Open the file and update the values in the "vars" section. 
+	nginx_num_processes - The number of NGINX processes that will be launched
+	config_file_ ... - The configuration files that govern the creation of video files of each resolution type (See next step)
+	do_file_gen - Whether or not to perform file generation step. This should be set to true the first time it is run. For all subsequent runs, it is okay to skip the file generation step and do_file_gen can be set to false.
+
+2. The characteristics of the file-set to generate are specified in the filegen_param_<quality>p.conf
+	library_size - The number of files of the particular quality to generate
+	num_log_files - Number of unique log files. Each log file describes a fixed number of unique sessions, as decided by the next parameter
+	num_log_sessions - Number of sessions per log file
+	video_quality - Valid options are 240p, 360p, 480p and 720p
+
+   Update these values to customize your file-set.
+
+3. Launch the Ansible playbook. 
+	ansible-playbook -v launch_server.yml
+   This step will generate the file-set under the directory videos/ and also the Httperf session logs, under the directory filegen/, in the shared directory created in Step a-7, on the host.
+
+4. The Httperf session logs start with cl-*. Copy these over to the Ansible machine at directory <log_directory>.
+
+d) Launching the client docker using Ansible playbook
+
+The Ansible playbook for the client is launch_client.yml. The playbook builds the Httperf client on the remote client containers. Then, it launches a local script, launch_hunt_bin.sh, which "hunts" for the peak throughput of the system using a binary search algorithm. The script ssh-es into the remote machines and runs a list of Httperf commands on them. The list of Httperf commands are in the file command_list.txt. The format of the Httperf command is --
+
+httperf --hog --server <server_ip> --port <server_port> \
+  --videosesslog=[<full_path_of_log1>,<full_path_of_log2>,<full_path_of_log3>,<full_path_of_log4>],[<perc_of_requests_from_log1>,<perc_of_requests_from_log2>,<perc_of_requests_from_log3>,<perc_of_requests_from_log4] \
+  --epoll --recv-buffer=<size_of_recv_buffer>
+
+The --videosesslog takes values in the following format --videosesslog=[list_of_httperf_session_logs],[probability_distribution_of_requests_from_each_log]
+
+For example,
+httperf --hog --server 10.22.17.71 --port 80  --videosesslog=[/logs/cl-240p-50-10000-10-20-00.log,/logs/cl-360p-50-4000-10-20-00.log,/logs/cl-480p-50-1600-20-00.log,/logs/cl-720p-50-800-10-20-00.log],[0.1,0.3,0.4,0.2] --epoll --recv-buffer=8388608
+
+1. 
+
+
+ 
+
+ 
