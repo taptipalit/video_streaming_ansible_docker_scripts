@@ -53,7 +53,7 @@ b) Setup the Ansible machine
 
 c) Setting up the video server container using Ansible playbook
 
-1. The launch_client.yml playbook is the Ansible playbook for the client. It is parameterized. Open the file and update the values in the "vars" section. 
+1. The launch_server.yml playbook is the Ansible playbook for the server. It is parameterized. Open the file and update the values in the "vars" section. 
 	nginx_num_processes - The number of NGINX processes that will be launched
 	config_file_ ... - The configuration files that govern the creation of video files of each resolution type (See next step)
 	do_file_gen - Whether or not to perform file generation step. This should be set to true the first time it is run. For all subsequent runs, it is okay to skip the file generation step and do_file_gen can be set to false.
@@ -74,7 +74,7 @@ c) Setting up the video server container using Ansible playbook
 
 d) Launching the client docker using Ansible playbook
 
-The Ansible playbook for the client is launch_client.yml. The playbook builds the Httperf client on the remote client containers. Then, it launches a local script, launch_hunt_bin.sh, which "hunts" for the peak throughput of the system using a binary search algorithm. The script ssh-es into the remote machines and runs a list of Httperf commands on them. The list of Httperf commands are in the file command_list.txt. The format of the Httperf command is --
+The Ansible playbook for the client is launch_client.yml. The playbook builds the Httperf client on the remote client containers. Then, the user must local script, launch_hunt_bin.sh, which "hunts" for the peak throughput of the system using a binary search algorithm. The script ssh-es into the remote machines and runs a list of Httperf commands on them. The list of Httperf commands are in the file command_list.txt. The format of the Httperf command is --
 
 httperf --hog --server <server_ip> --port <server_port> \
   --videosesslog=[<full_path_of_log1>,<full_path_of_log2>,<full_path_of_log3>,<full_path_of_log4>],[<perc_of_requests_from_log1>,<perc_of_requests_from_log2>,<perc_of_requests_from_log3>,<perc_of_requests_from_log4] \
@@ -93,7 +93,7 @@ httperf --hog --server 10.22.17.71 --port 80  --videosesslog=[/logs/cl-240p-50-1
 3. Clone the git repository for the remote execution scripts
 	git clone https://github.com/taptipalit/hunter.git
 
-4. Enter the IPs of the client machines in host_list.sh, and the list of Httperf commands in command_list.sh. Enter the full paths of the log files and their probability distribution for the --videosesslog parameter.
+4. Enter the IPs of the client machines in host_list.txt, and the list of Httperf commands in command_list.txt. Enter the full paths of the log files and their probability distribution for the --videosesslog parameter.
 
 5. Run the script to find the maximum throughput using a binary-search algorithm.
 
