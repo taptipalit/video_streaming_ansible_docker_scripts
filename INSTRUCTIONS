@@ -85,7 +85,22 @@ The --videosesslog takes values in the following format --videosesslog=[list_of_
 For example,
 httperf --hog --server 10.22.17.71 --port 80  --videosesslog=[/logs/cl-240p-50-10000-10-20-00.log,/logs/cl-360p-50-4000-10-20-00.log,/logs/cl-480p-50-1600-20-00.log,/logs/cl-720p-50-800-10-20-00.log],[0.1,0.3,0.4,0.2] --epoll --recv-buffer=8388608
 
-1. 
+1. In launch_client.yml, fill in the parameters -- the names of the Httperf log files (which have been copied over from the server machine), the directory path to where they are stored (<log_directory> from step c-4)
+
+2. To build the Httperf clients and copy over the Httperf logs, run the Ansible playbook
+	ansible-playbook -v launch_client.yml
+
+3. Clone the git repository for the remote execution scripts
+	git clone https://github.com/taptipalit/hunter.git
+
+4. Enter the IPs of the client machines in host_list.sh, and the list of Httperf commands in command_list.sh. Enter the full paths of the log files and their probability distribution for the --videosesslog parameter.
+
+5. Run the script to find the maximum throughput using a binary-search algorithm.
+
+  	./launch_hunt_bin.sh host_list.txt command_list.txt <output_directory> <remote_ssh_user> <min_throughput> <max_throughput>
+  
+   This will ssh into each machine specified in the host_list.txt file and run all Httperf commands in the file command_list.txt. The min_throughput and max_throughput parameters are the range across which the binary search will be performed. The output_directory is used to store output.
+
 
 
  
