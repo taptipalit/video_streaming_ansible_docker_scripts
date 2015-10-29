@@ -21,11 +21,13 @@ then
 	exit 1
 fi
 
-ssh "$user@$host" "sudo docker exec streaming_client mkdir $remoteOutputPath/results"
+
 while read hostLine
 do
 	host="$(echo $hostLine | awk '{print $1}')"
 
+
+	ssh "$user@$host" "sudo docker exec streaming_client mkdir $remoteOutputPath/results"
 	echo "Launching clients on $host";
 	clientIp1="$(echo $hostLine | awk '{print $2}')"
 	clientIp2="$(echo $hostLine | awk '{print $3}')"
