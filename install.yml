@@ -1,0 +1,30 @@
+---
+- hosts: all
+  tasks:
+  - name: Get Ubuntu codename
+    shell: lsb_release -sc
+    register: codename
+  - name: Add docker apt repository
+    apt_repository: repo="deb https://apt.dockerproject.org/repo ubuntu-{{codename.stdout}} main" state=present
+    sudo: yes
+  - name: Install Docker and git is installed
+    apt: pkg=docker-engine state=present update_cache=yes force=yes
+    sudo: yes
+  - name: Checkout the Docker scripts
+    git: repo=https://github.com/taptipalit/video_streaming_ansible_docker_scripts.git dest=streaming_benchmark
+
+- hosts: server
+  tasks:
+  - name: Build the server docker
+    command: docker build -t streaming_server streaming_benchmark/docker_server
+  - name: Run the server docker
+    command: docker run -d --net=host -v /streaming_server:/streaming_server --privileged=true --name=server_docker streaming_server
+    sudo: yes
+
+- hosts: clients
+  tasks:
+  - name: Build the client docker
+    command: docker build -t streaming_client streaming_benchmark/docker_client
+  - name: Run the client docker
+    command: docker run -d --net=host -v /streaming_client:/streaming_client --privileged=true --name=client_docker streaming_client
+    sudo: yes
