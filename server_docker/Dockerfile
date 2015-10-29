@@ -3,11 +3,10 @@ FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
 # Install software
-RUN apt-get update 
-RUN apt-get install -y nginx
-#RUN apt-get install -y openssh-server
-RUN apt-get install -y build-essential
-RUN apt-get install -y git
+RUN apt-get update && RUN apt-get install -y \
+	build-essential \
+	git \
+	nginx
 
 # Create the mount-point for the shared directory, with the host
 RUN mkdir /benchmarking
@@ -24,12 +23,13 @@ RUN cat /tmp/limits.conf.append >> /etc/security/limits.conf && rm -f /tmp/limit
 # Clone the file generation repo and build it
 RUN git clone https://github.com/taptipalit/fileset_log_generator.git /streaming_source/filegen
 RUN make -C /streaming_source/filegen make_zipf
+RUN make -C /streaming_source/filegen gen_fileset
 
 # Update NGINX directory to point to /videos. The videos will be generated via the Ansible script
 RUN sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sites-available/default
 #RUN sed -i 's/worker_processes 4;/worker_processes 32/g' /etc/nginx/nginx.conf # @TODO - FIx this!
 
 RUN service nginx start
+
+WORKDIR /streaming_source/filegen
 CMD bash
-
-
