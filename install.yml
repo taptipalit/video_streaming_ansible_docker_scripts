@@ -30,3 +30,5 @@
   - name: Run the client docker
     command: docker run -d -t --net=host -v /streaming_client:/streaming_client --privileged=true --name=streaming_client streaming_client
     sudo: yes
+  - name: Run the bandwidth limiting script
+    command: docker exec streaming_client /bw_setup.sh {{if}} {{ip_alias1}} {{ip_alias2}} {{ip_alias3}} {{ip_alias4}}

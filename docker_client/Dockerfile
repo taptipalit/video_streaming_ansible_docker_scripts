@@ -14,6 +14,11 @@ WORKDIR /dummynet
 RUN make
 RUN make install
 RUN insmod kipfw-mod/ipfw_mod.ko
+RUN cp cp ipfw/ipfw /usr/bin/
+
+# Copy the bandwidth limiting script
+
+COPY bw_setup.sh /
 
 # Build utilities
 COPY files/videoperf/ /videoperf/
