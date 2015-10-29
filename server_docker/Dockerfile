@@ -3,11 +3,11 @@ FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
 # Install software
-RUN apt-get update && apt-get install -y nginx
+RUN apt-get update 
+RUN apt-get install -y nginx
 #RUN apt-get install -y openssh-server
 RUN apt-get install -y build-essential
 RUN apt-get install -y git
-RUN apt-get install -y vim
 
 # Create the mount-point for the shared directory, with the host
 RUN mkdir /benchmarking
