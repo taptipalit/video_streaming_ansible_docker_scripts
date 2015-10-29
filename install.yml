@@ -16,6 +16,12 @@
 
 - hosts: server
   tasks:
+  - name: Stop any docker container named streaming_server
+    command: sudo docker stop streaming_server
+    sudo: yes
+  - name: Remove any docker container named streaming_server
+    command: sudo docker rm streaming_server
+    sudo: yes
   - name: Build the server docker
     command: sudo docker build -t streaming_server streaming_benchmark/docker_server
     sudo: yes
@@ -25,6 +31,12 @@
 
 - hosts: clients
   tasks:
+  - name: Stop any docker container named streaming_client_
+    command: sudo docker stop streaming_client
+    sudo: yes
+  - name: Remove any docker container named streaming_client
+    command: sudo docker rm streaming_client
+    sudo: yes
   - name: Build the client docker
     command: sudo docker build -t streaming_client streaming_benchmark/docker_client
     sudo: yes
@@ -33,12 +45,14 @@
     sudo: yes
   - name: Install the kernel sources
     command: apt-get install linux-source -y
+    sudo: yes
   - name: Clone the httperf directory
     git: repo=https://github.com/luigirizzo/dummynet.git dest=dummynet
   - name: Build the dummynet
-    command: make
+    command: chdir=dummynet make
   - name: Install dummynet
-    command: make install
+    command: chdir=dummynet make install
+    sudo: yes
   - name: Copy the bandwidth limiting script
     copy: src=bw_setup.sh dest=/streaming_client
   - name: Run the bandwidth limiting script
