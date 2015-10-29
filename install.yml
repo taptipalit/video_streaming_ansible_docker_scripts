@@ -17,14 +17,16 @@
   tasks:
   - name: Build the server docker
     command: docker build -t streaming_server streaming_benchmark/docker_server
+    sudo: yes
   - name: Run the server docker
-    command: docker run -d --net=host -v /streaming_server:/streaming_server --privileged=true --name=streaming_server streaming_server
+    command: docker run -d -t --net=host -v /streaming_server:/streaming_server --privileged=true --name=streaming_server streaming_server
     sudo: yes
 
 - hosts: clients
   tasks:
   - name: Build the client docker
     command: docker build -t streaming_client streaming_benchmark/docker_client
+    sudo: yes
   - name: Run the client docker
-    command: docker run -d --net=host -v /streaming_client:/streaming_client --privileged=true --name=streaming_client streaming_client
+    command: docker run -d -t --net=host -v /streaming_client:/streaming_client --privileged=true --name=streaming_client streaming_client
     sudo: yes

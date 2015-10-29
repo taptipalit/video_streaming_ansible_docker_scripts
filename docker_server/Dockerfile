@@ -19,4 +19,6 @@ RUN make make_zipf gen_fileset
 RUN sed -i 's/\/usr\/share\/nginx\/html/\/streaming_server\/videos/g' /etc/nginx/sites-available/default
 #RUN sed -i 's/worker_processes 4;/worker_processes 32/g' /etc/nginx/nginx.conf # @TODO - Fix this!
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN service nginx start
+
+CMD bash

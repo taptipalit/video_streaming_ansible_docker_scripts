@@ -12,3 +12,5 @@ COPY files/videoperf/ /videoperf/
 WORKDIR /videoperf
 RUN ./configure
 RUN make
+
+CMD bash
