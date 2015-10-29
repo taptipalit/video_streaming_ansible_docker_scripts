@@ -8,10 +8,14 @@
   - name: Copy filegen parameter files
     synchronize: src=filegen_params/ dest={{streaming_server_dir}}/filegen_params/ delete=yes
   - name: Generate video files and logs
-    command: docker exec {{server_docker} {{filegen_dir}}/generate_video_files_and_logs.sh {{streaming_server_dir}}/filegen_params/ {{streaming_server_dir}}/videos/
+    command: docker exec {{server_docker}} {{filegen_dir}}/generate_video_files_and_logs.sh {{streaming_server_dir}}/filegen_params {{streaming_server_dir}}/videos
   - name: Create shared logs directory
     file: path={{streaming_server_dir}}/logs state=directory
   - name: Move generated logs to shared directory
     command: docker exec {{server_docker}} mv {{filegen_dir}}/cl-*.log {{streaming_server_dir}}/logs/
   - name: Copy generated logs back to controller host
     synchronize: src={{streaming_server_dir}}/logs/ dest=./logs/ mode=pull
+  - name: Clear client host list
+    local_action: command echo -n > client.hostlist
+  - name: Distribute logs to clients
+    local_action: command ansible -i {{inventry_file}} run_distribute_dataset.yml
