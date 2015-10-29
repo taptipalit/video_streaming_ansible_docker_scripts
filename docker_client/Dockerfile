@@ -7,6 +7,14 @@ RUN apt-get update && apt-get install -y \
 	git \
 	libssl-dev
 
+# Build dummynet for bandwidth limiting
+RUN git clone https://github.com/luigirizzo/dummynet /dummynet
+
+WORKDIR /dummynet
+RUN make
+RUN make install
+RUN insmod kipfw-mod/ipfw_mod.ko
+
 # Build utilities
 COPY files/videoperf/ /videoperf/
 WORKDIR /videoperf
