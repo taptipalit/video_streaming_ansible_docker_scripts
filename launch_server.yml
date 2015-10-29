@@ -17,9 +17,10 @@
   - name: Copy param config to docker
     command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
   - name: Generate the logs and video-list for 240p
-    command: docker exec server_docker /streaming_source/filegen/make_zipf
+    command: docker exec server_docker ./make_zipf
+    ignore_errors: yes
   - name: Generate video file-set for 240p
-    command: docker exec server_docker /streaming_source/filegen/gen_fileset /benchmarking/videos/full-240p- /video_files.txt # TODO - Figure out how to specify a working directory for docker exec
+    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-240p- ./video_files.txt # TODO - Figure out how to specify a working directory for docker exec
 
     # For 360p
   - name: Copy over 360p param config file
@@ -28,8 +29,9 @@
     command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
   - name: Generate the logs and video-list for 360p
     command: docker exec server_docker /streaming_source/filegen/make_zipf
+    ignore_errors: yes
   - name: Generate video file-set for 360p
-    command: docker exec server_docker /streaming_source/filegen/gen_fileset /benchmarking/videos/full-360p- /video_files.txt
+    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-360p- ./video_files.txt
 
     # For 480p
   - name: Copy over 480p param config file
@@ -38,8 +40,9 @@
     command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
   - name: Generate the logs and video-list for 480p
     command: docker exec server_docker /streaming_source/filegen/make_zipf
+    ignore_errors: yes
   - name: Generate video file-set for 480p
-    command: docker exec /streaming_source/filegen/gen_fileset /benchmarking/videos/full-480p- /video_files.txt
+    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-480p- ./video_files.txt
 
     # For 720p
   - name: Copy over 720p param config file
@@ -47,6 +50,13 @@
   - name: Copy param config to docker
     command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
   - name: Generate the logs and video-list for 720p
-    command: docker exec /streaming_source/filegen/make_zipf
+    command: docker exec server_docker /streaming_source/filegen/make_zipf
+    ignore_errors: yes
   - name: Generate video file-set for 720p
-    command: docker exec /streaming_source/filegen/gen_fileset /benchmarking/videos/full-720p- /video_files.txt
+    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-720p- ./video_files.txt
+
+    # Copy over the logs to the shared directory and then launch a scp to copy them over to the Ansible host
+  - name: Copy over logs to shared directory
+    command: docker exec server_docker sh -c 'cp /streaming_source/filegen/cl* /benchmarking'
+  - name: SCP logs to Ansible host
+    local_action: command scp {{ ansible_hostname }}:~/shared_dir/cl* ./
