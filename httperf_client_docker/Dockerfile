@@ -17,6 +17,7 @@ RUN chmod a+rwx /streaming_source
 
 # Clone the Video Httperf client
 RUN git clone https://github.com/taptipalit/videoperf.git /streaming_source/httperf
-RUN /streaming_source/httperf/configure
-RUN make -C /streaming_source/httperf
+WORKDIR /streaming_source/httperf
 
+RUN ./configure
+RUN make 

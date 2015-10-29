@@ -23,8 +23,10 @@ RUN cat /tmp/limits.conf.append >> /etc/security/limits.conf && rm -f /tmp/limit
 
 # Clone the file generation repo and build it
 RUN git clone https://github.com/taptipalit/fileset_log_generator.git /streaming_source/filegen
-RUN make -C /streaming_source/filegen make_zipf
-RUN make -C /streaming_source/filegen gen_fileset
+
+WORKDIR /streaming_source/filegen
+RUN make make_zipf
+RUN make gen_fileset
 
 # Update NGINX directory to point to /videos. The videos will be generated via the Ansible script
 RUN sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sites-available/default
@@ -32,7 +34,6 @@ RUN sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sit
 
 RUN service nginx start
 
-WORKDIR /streaming_source/filegen
 CMD bash
 
 
