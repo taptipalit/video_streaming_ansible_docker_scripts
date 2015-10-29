@@ -27,8 +27,9 @@ RUN make -C /streaming_source/filegen make_zipf
 
 # Update NGINX directory to point to /videos. The videos will be generated via the Ansible script
 RUN sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sites-available/default
-RUN sed -i 's/worker_processes 4;/worker_processes 32/g' /etc/nginx/nginx.conf # @TODO - FIx this!
+#RUN sed -i 's/worker_processes 4;/worker_processes 32/g' /etc/nginx/nginx.conf # @TODO - FIx this!
 
-CMD service nginx start
+RUN service nginx start
+CMD bash
 
 
