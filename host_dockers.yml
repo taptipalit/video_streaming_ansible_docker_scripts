@@ -37,6 +37,6 @@
   - name: Make a shared directory
     file: path=~/shared_directory state=directory
   - name: Run the client docker
-    command: chdir=~/dockers/httperf_client_docker run -t -d --net=host -v ~/shared_dir:/benchmarking --privileged=true --name=client_docker -w=/streaming_source/httperf streaming_client
+    command: chdir=~/dockers/httperf_client_docker docker run -t -d --net=host -v ~/shared_dir:/benchmarking --privileged=true --name=client_docker -w=/streaming_source/httperf streaming_client
 
  
