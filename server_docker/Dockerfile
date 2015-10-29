@@ -31,6 +31,8 @@ RUN sed -i 's/\/usr\/share\/nginx\/html/\/benchmarking\/videos/g' /etc/nginx/sit
 #RUN sed -i 's/worker_processes 4;/worker_processes 32/g' /etc/nginx/nginx.conf # @TODO - FIx this!
 
 RUN service nginx start
+
+WORKDIR /streaming_source/filegen
 CMD bash
 
 

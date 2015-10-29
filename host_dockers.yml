@@ -27,6 +27,8 @@
     file: path=~/shared_directory state=directory
   - name: Run the server docker
     command: chdir=~/dockers/server_docker docker run -t -d --net=host -v ~/shared_dir:/benchmarking --privileged=true --name=server_docker streaming_server
+  - name: Change permissions on this directory inside the container
+    command: docker exec server_docker chmod a+rwx /benchmarking 
 
 - hosts: clienthosts
   tasks:
