@@ -3,9 +3,9 @@ FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
 # Install software
-RUN apt-get update 
-RUN apt-get install -y build-essential
-RUN apt-get install -y git
+RUN apt-get update && apt-get install -y \
+	build-essential \
+	git \
 
 # Create the mount-point for the shared directory 
 RUN mkdir /benchmarking
@@ -21,3 +21,6 @@ WORKDIR /streaming_source/httperf
 
 RUN ./configure
 RUN make 
+=======
+RUN /streaming_source/httperf/configure
+RUN make -C /streaming_source/httperf
