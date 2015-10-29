@@ -1,62 +1,17 @@
 ---
-- hosts: serverhosts
+- hosts: server
   vars:
-    # Modify these parameters for required settings
-    config_file_240p: filegen_param_240p.conf		# Names of the config files that specify the details of the file-sets
-    config_file_360p: filegen_param_360p.conf		
-    config_file_480p: filegen_param_480p.conf
-    config_file_720p: filegen_param_720p.conf
+    streaming_server_dir: /streaming_server
+    filegen_dir: /filegen
+    server_docker: streaming_server
   tasks:
-  - name: Create the videos directory
-    command: docker exec server_docker mkdir -p /benchmarking/videos
-    ignore_errors: yes
-    # First copy over the param.confs to the remote host directory. Then do a docker cp to copy into the docker container.
-    # For 240p
-  - name: Copy over 240p param config file to remote host
-    copy: src=./{{config_file_240p}} dest=~/filegen_param.conf
-  - name: Copy param config to docker
-    command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
-  - name: Generate the logs and video-list for 240p
-    command: docker exec server_docker ./make_zipf
-    ignore_errors: yes
-  - name: Generate video file-set for 240p
-    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-240p- ./video_files.txt # TODO - Figure out how to specify a working directory for docker exec
-
-    # For 360p
-  - name: Copy over 360p param config file
-    copy: src=./{{config_file_360p}} dest=~/filegen_param.conf
-  - name: Copy param config to docker
-    command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
-  - name: Generate the logs and video-list for 360p
-    command: docker exec server_docker /streaming_source/filegen/make_zipf
-    ignore_errors: yes
-  - name: Generate video file-set for 360p
-    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-360p- ./video_files.txt
-
-    # For 480p
-  - name: Copy over 480p param config file
-    copy: src=./{{config_file_480p}} dest=~/filegen_param.conf
-  - name: Copy param config to docker
-    command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
-  - name: Generate the logs and video-list for 480p
-    command: docker exec server_docker /streaming_source/filegen/make_zipf
-    ignore_errors: yes
-  - name: Generate video file-set for 480p
-    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-480p- ./video_files.txt
-
-    # For 720p
-  - name: Copy over 720p param config file
-    copy: src=./{{config_file_720p}} dest=~/filegen_param.conf
-  - name: Copy param config to docker
-    command: docker cp ~/filegen_param.conf server_docker:/streaming_source/filegen
-  - name: Generate the logs and video-list for 720p
-    command: docker exec server_docker /streaming_source/filegen/make_zipf
-    ignore_errors: yes
-  - name: Generate video file-set for 720p
-    command: docker exec server_docker ./gen_fileset /benchmarking/videos/full-720p- ./video_files.txt
-
-    # Copy over the logs to the shared directory and then launch a scp to copy them over to the Ansible host
-  - name: Copy over logs to shared directory
-    command: docker exec server_docker sh -c 'cp /streaming_source/filegen/cl* /benchmarking'
-  - name: SCP logs to Ansible host
-    local_action: command scp {{ ansible_hostname }}:~/shared_dir/cl* ./
+  - name: Copy filegen parameter files
+    synchronize: src=filegen_params/ dest={{streaming_server_dir}}/filegen_params/ delete=yes
+  - name: Generate video files and logs
+    command: docker exec {{server_docker} {{filegen_dir}}/generate_video_files_and_logs.sh {{streaming_server_dir}}/filegen_params/ {{streaming_server_dir}}/videos/
+  - name: Create shared logs directory
+    file: path={{streaming_server_dir}}/logs state=directory
+  - name: Move generated logs to shared directory
+    command: docker exec {{server_docker}} mv {{filegen_dir}}/cl-*.log {{streaming_server_dir}}/logs/
+  - name: Copy generated logs back to controller host
+    synchronize: src={{streaming_server_dir}}/logs/ dest=./logs/ mode=pull
