@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
 # Install software
-RUN apt-get update && RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
 	build-essential \
 	git \
 	nginx
