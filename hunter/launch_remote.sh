@@ -34,13 +34,13 @@ do
  	do
 		cmd="./httperf --hog --server $videoServerIp --videosesslog=[$log1,$log2,$log3,$log4],[0.1,0.3,0.4,0.2],[$clientIp1,$clientIp2,$clientIp3,$clientIp4] --epoll --recv-buffer=524288 --port 80 --output-log=$remoteOutputPath/result$i.log --num-sessions=$numSessions --rate=$rate"; 
 		echo "Running command $cmd"
-		ssh "$user@$host -p 22" "docker exec client_docker $cmd" > "stdout$i" &
+		ssh "$user@$host" "sudo docker exec streaming_client $cmd" > "stdout$i" &
 	done 
 	wait
 	# Copy over the logs
 	cmd="scp -r $user@$host:$remoteOutputPath/result\* ./output/"
 	echo $cmd
 	eval $cmd
-	ssh "$user@$host" "rm  $remoteOutputPath/result*"
+	ssh "$user@$host" "sudo rm  $remoteOutputPath/result*"
 done < "$hostFileName"
 
