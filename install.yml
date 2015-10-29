@@ -51,9 +51,14 @@
   - name: Build the dummynet
     command: chdir=dummynet make
   - name: Install dummynet
-    command: chdir=dummynet make install
+    command: chdir=dummynet cp ipfw/ipfw /usr/sbin/ipfw
     sudo: yes
+  - name: Load the module
+    command: insmod dummynet/kipfw-mod/ipfw_mod.ko
+    sudo: yes
+    ignore_errors: yes
   - name: Copy the bandwidth limiting script
-    copy: src=bw_setup.sh dest=/streaming_client
+    copy: src=bw_setup.sh dest=/streaming_client mode="a+x" 
+    sudo: yes
   - name: Run the bandwidth limiting script
-    command: sudo docker exec streaming_client bw_setup.sh {{if}} {{ip_alias1}} {{ip_alias2}} {{ip_alias3}} {{ip_alias4}}
+    command: sudo /streaming_client/bw_setup.sh {{if}} {{ip_alias1}} {{ip_alias2}} {{ip_alias3}} {{ip_alias4}}

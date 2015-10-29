@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if=$1
 ip_alias1=$2
 ip_alias2=$3
