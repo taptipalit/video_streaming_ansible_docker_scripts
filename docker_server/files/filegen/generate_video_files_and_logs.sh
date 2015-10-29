@@ -9,6 +9,6 @@ cd /filegen
 for paramfile in "$PARAMS/"*; do
 	BN=$(basename "$paramfile")
 	cp "$paramfile" filegen_param.conf
-	./make_zipf
-	./gen_fileset "$VIDEOS/full-$BN-" ./video_files.txt
+	sudo ./make_zipf
+	sudo ./gen_fileset "$VIDEOS/full-$BN-" ./video_files.txt
 done
