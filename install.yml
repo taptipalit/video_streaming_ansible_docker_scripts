@@ -12,23 +12,34 @@
     sudo: yes
   - name: Checkout the Docker scripts
     git: repo=https://github.com/taptipalit/video_streaming_ansible_docker_scripts.git dest=streaming_benchmark
+    ignore_errors: yes
 
 - hosts: server
   tasks:
   - name: Build the server docker
-    command: docker build -t streaming_server streaming_benchmark/docker_server
+    command: sudo docker build -t streaming_server streaming_benchmark/docker_server
     sudo: yes
   - name: Run the server docker
-    command: docker run -d -t --net=host -v /streaming_server:/streaming_server --privileged=true --name=streaming_server streaming_server
+    command: sudo docker run -d -t --net=host -v /streaming_server:/streaming_server --privileged=true --name=streaming_server streaming_server
     sudo: yes
 
 - hosts: clients
   tasks:
   - name: Build the client docker
-    command: docker build -t streaming_client streaming_benchmark/docker_client
+    command: sudo docker build -t streaming_client streaming_benchmark/docker_client
     sudo: yes
   - name: Run the client docker
-    command: docker run -d -t --net=host -v /streaming_client:/streaming_client --privileged=true --name=streaming_client streaming_client
+    command: sudo docker run -d -t --net=host -v /streaming_client:/streaming_client --privileged=true --name=streaming_client streaming_client
     sudo: yes
+  - name: Install the kernel sources
+    command: apt-get install linux-source -y
+  - name: Clone the httperf directory
+    git: repo=https://github.com/luigirizzo/dummynet.git dest=dummynet
+  - name: Build the dummynet
+    command: make
+  - name: Install dummynet
+    command: make install
+  - name: Copy the bandwidth limiting script
+    copy: src=bw_setup.sh dest=/streaming_client
   - name: Run the bandwidth limiting script
-    command: docker exec streaming_client /bw_setup.sh {{if}} {{ip_alias1}} {{ip_alias2}} {{ip_alias3}} {{ip_alias4}}
+    command: sudo docker exec streaming_client bw_setup.sh {{if}} {{ip_alias1}} {{ip_alias2}} {{ip_alias3}} {{ip_alias4}}
