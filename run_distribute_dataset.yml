@@ -1,4 +1,8 @@
 ---
+- hosts: server
+  tasks:
+  - name: Clear client host list
+    local_action: command truncate -s 0 hostlist.client
 - hosts: clients
   vars:
     streaming_client_dir: /streaming_client

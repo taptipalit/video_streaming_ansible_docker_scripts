@@ -26,7 +26,7 @@ echo "Maximum number of sessions = $maxNumSessions"
 benchmarkSuccess=1
 
 outputDir="./output"
-outputDirPath="./output/*"
+backUpStdoutDir="./output-stdout"
 
 rm -rf "$outputDir" "$backUpStdoutDir"
 mkdir -p "$outputDir" "$backUpStdoutDir"
@@ -39,14 +39,14 @@ function launchRemote () {
   
   numSessions="$1"
   rate=$[numSessions/10]
-  cp ./stdout* $backUpStdoutDir/
-  ./launch_remote.sh $videoServerIp $hostFileName $remoteOutputPath $numClientsPerHost $numSessions $rate
+  find . -name stdout\* -exec mv '{}' $backUpStdoutDir/ \;
+  $(dirname $0)/launch_remote.sh $videoServerIp $hostFileName $remoteOutputPath $numClientsPerHost $numSessions $rate
   if [ $? -ne 0 ]; then
     echo 'Failed launching remote... exiting.'
     exit
   fi
   # Open each file in output directory
-  for outputFile in $outputDirPath;
+  for outputFile in $outputDir/*;
   do
     numConns="$(grep 'Total: connections' $outputFile | awk '{print $3}')"
     numErrors="$(grep 'Errors: total' $outputFile | awk '{print $3}')"
@@ -58,7 +58,7 @@ function launchRemote () {
   echo "Total errors = $totalErrors"
   echo "Percentage failure = $percFailure"
   if [ "$percFailure" -gt 5 ]; then
-    echo 'Benchmark failed. Please see the stdout directory for last successful run.'  
+    echo "Benchmark failed.  The $backUpStdoutDir directory has output for the last successful run."
     sleep 10
     benchmarkSuccess=0
   else

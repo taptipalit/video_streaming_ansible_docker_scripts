@@ -18,8 +18,6 @@
     sudo: yes
   - name: Copy generated logs back to controller host
     synchronize: src={{streaming_server_dir}}/logs/ dest=./logs/ mode=pull
-  - name: Clear client host list
-    local_action: command truncate -s 0 hostlist.client
   - name: Create server host list
     local_action: shell echo "{{inventory_hostname}}" >> hostlist.server
   - name: Distribute logs to clients
