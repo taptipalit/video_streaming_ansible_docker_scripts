@@ -1,5 +1,5 @@
-modify ansible-inventory.ini, listing the IPs of the server and any client
-machines.  For each client machine, specify the IP aliases to be created.
+Modify ansible-inventory.ini, listing the IPs of the server and any client
+machines.  For each client machine, specify four IP aliases to be created.
 
 Install the benchmark on server and clients:
 	ansible-playbook -i ansible-inventory.ini -v install.yml
