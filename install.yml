@@ -7,20 +7,17 @@
   - name: Add docker apt repository
     apt_repository: repo="deb https://apt.dockerproject.org/repo ubuntu-{{codename.stdout}} main" state=present
     sudo: yes
-  - name: Install Docker and git is installed
+  - name: Install Docker
     apt: pkg=docker-engine state=present update_cache=yes force=yes
+    apt: pkg=git state=present update_cache=yes
     sudo: yes
-  - name: Checkout the Docker scripts
-    git: repo=https://github.com/taptipalit/video_streaming_ansible_docker_scripts.git dest=streaming_benchmark
-    ignore_errors: yes
+  - name: Copy the scripts to destination host
+    synchronize: src=./ dest=streaming_benchmark/
 
 - hosts: server
   tasks:
-  - name: Stop any docker container named streaming_server
-    command: sudo docker stop streaming_server
-    sudo: yes
-  - name: Remove any docker container named streaming_server
-    command: sudo docker rm streaming_server
+  - name: Remove docker container named streaming_server if it exists
+    command: sudo docker rm -f streaming_server
     sudo: yes
   - name: Build the server docker
     command: sudo docker build -t streaming_server streaming_benchmark/docker_server
@@ -31,11 +28,8 @@
 
 - hosts: clients
   tasks:
-  - name: Stop any docker container named streaming_client_
-    command: sudo docker stop streaming_client
-    sudo: yes
-  - name: Remove any docker container named streaming_client
-    command: sudo docker rm streaming_client
+  - name: Remove docker container named streaming_client if it exists
+    command: sudo docker rm -f streaming_client
     sudo: yes
   - name: Build the client docker
     command: sudo docker build -t streaming_client streaming_benchmark/docker_client
@@ -44,21 +38,19 @@
     command: sudo docker run -d -t --net=host -v /streaming_client:/streaming_client --privileged=true --name=streaming_client streaming_client
     sudo: yes
   - name: Install the kernel sources
-    command: apt-get install linux-source -y
+    apt: pkg=linux-source state=present update_cache=yes
     sudo: yes
-  - name: Clone the httperf directory
+  - name: Get the dummynet code
     git: repo=https://github.com/luigirizzo/dummynet.git dest=dummynet
-  - name: Build the dummynet
+  - name: Build dummynet
     command: chdir=dummynet make
   - name: Install dummynet
     command: chdir=dummynet cp ipfw/ipfw /usr/sbin/ipfw
     sudo: yes
-  - name: Load the module
+  - name: Load dummynet
     command: insmod dummynet/kipfw-mod/ipfw_mod.ko
     sudo: yes
     ignore_errors: yes
-  - name: Copy the bandwidth limiting script
-    copy: src=bw_setup.sh dest=/streaming_client mode="a+x" 
+  - name: Set client bandwidth limits
+    command: streaming_benchmark/run_limit_bw.sh {{if}} {{ips}}
     sudo: yes
-  - name: Run the bandwidth limiting script
-    command: sudo /streaming_client/bw_setup.sh {{if}} {{ip_alias1}} {{ip_alias2}} {{ip_alias3}} {{ip_alias4}}
