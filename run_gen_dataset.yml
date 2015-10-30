@@ -15,7 +15,6 @@
     sudo: yes
   - name: Move generated logs to shared directory
     command: docker exec {{server_docker}} sh -c "cp {{filegen_dir}}/cl* {{streaming_server_dir}}/logs/"
-    #command: docker exec {{server_docker}} mv {{filegen_dir}}/cl-* {{streaming_server_dir}}/logs/
     sudo: yes
   - name: Copy generated logs back to controller host
     synchronize: src={{streaming_server_dir}}/logs/ dest=./logs/ mode=pull

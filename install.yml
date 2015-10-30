@@ -2,7 +2,7 @@
 - hosts: all
   tasks:
   - name: Get Ubuntu codename
-    shell: lsb_release -sc
+    command: lsb_release -sc
     register: codename
   - name: Add docker apt repository
     apt_repository: repo="deb https://apt.dockerproject.org/repo ubuntu-{{codename.stdout}} main" state=present
@@ -16,6 +16,8 @@
 
 - hosts: server
   tasks:
+  - name: Make sure server has 1TB free for videos in /streaming_server
+    shell: mkdir -p /streaming_server && exit $(($(stat -f --format="%a*%S < 1000000000000" /streaming_server)))
   - name: Remove docker container named streaming_server if it exists
     command: sudo docker rm -f streaming_server
     sudo: yes
